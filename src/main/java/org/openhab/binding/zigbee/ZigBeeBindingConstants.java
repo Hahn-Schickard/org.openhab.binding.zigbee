@@ -60,15 +60,16 @@ public class ZigBeeBindingConstants {
     public static final String CHANNEL_PROPERTY_CLUSTER = "zigbee_cluster";
 
     public static final String CHANNEL_SWITCH_LEVEL = "switch_level";
-    
+
     public static final String CHANNEL_OCCUPANCY = "sensor_occupancy";
     public static final String CHANNEL_RELATIVE_HUMIDITY_VALUE = "measurement_relativehumidity";
+    public static final String CHANNEL_SCENE = "scene";
 
     public static final String ITEM_TYPE_COLOR = "Color";
     public static final String ITEM_TYPE_NUMBER = "Number";
     public static final String ITEM_TYPE_DIMMER = "Dimmer";
     public static final String ITEM_TYPE_SWITCH = "Switch";
-    
+
     public static final String THING_PROPERTY_MANUFACTURER = "zigbee_manufacturer";
     public static final String THING_PROPERTY_MODEL = "zigbee_model";
     public static final String THING_PROPERTY_HWVERSION = "zigbee_hwversion";

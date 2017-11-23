@@ -62,6 +62,7 @@ public abstract class ZigBeeChannelConverter {
         channelMap.put(ZigBeeBindingConstants.CHANNEL_COLOR_TEMPERATURE, ZigBeeConverterColorTemperature.class);
         channelMap.put(ZigBeeBindingConstants.CHANNEL_TEMPERATURE_VALUE, ZigBeeConverterTemperature.class);
         channelMap.put(ZigBeeBindingConstants.CHANNEL_OCCUPANCY, ZigBeeConverterOccupancySensor.class);
+        channelMap.put(ZigBeeBindingConstants.CHANNEL_SCENE, ZigBeeConverterScenes.class);
     }
 
     /**
@@ -119,7 +120,7 @@ public abstract class ZigBeeChannelConverter {
     }
 
     public abstract Channel getChannel(ThingUID thingUID, ZigBeeDevice device);
-    
+
     public static List<Channel> getChannels(ThingUID thingUID, ZigBeeDevice device) {
         List<Channel> channels = new ArrayList<Channel>();
 
@@ -158,8 +159,8 @@ public abstract class ZigBeeChannelConverter {
             constructor = channelMap.get(channelTypeUID.getId()).getConstructor();
             return constructor.newInstance();
         } catch (Exception e) {
-             logger.error("Command processor error {}", e.toString()); 
-             e.printStackTrace();
+            logger.error("Command processor error {}", e.toString());
+            e.printStackTrace();
         }
 
         return null;
@@ -182,7 +183,7 @@ public abstract class ZigBeeChannelConverter {
             String label) {
         Map<String, String> properties = new HashMap<String, String>();
         properties.put(ZigBeeBindingConstants.CHANNEL_PROPERTY_ADDRESS, device.getDeviceAddress().toString());
-              ChannelTypeUID channelTypeUID = new ChannelTypeUID(ZigBeeBindingConstants.BINDING_ID, channelType);
+        ChannelTypeUID channelTypeUID = new ChannelTypeUID(ZigBeeBindingConstants.BINDING_ID, channelType);
 
         return ChannelBuilder
                 .create(new ChannelUID(thingUID,

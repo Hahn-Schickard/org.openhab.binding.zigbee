@@ -78,5 +78,13 @@
         <category>Motion</category>
 		<state readOnly="true"></state>
     </channel-type>
+	
+	<!-- Scenes -->
+    <channel-type id="scene">
+        <item-type>Number</item-type>
+        <label>Scenes</label>
+        <description>Allows to select the calibration table on SusLight</description>
+        <category>Light</category>
+    </channel-type>
 
 </thing:thing-descriptions>
