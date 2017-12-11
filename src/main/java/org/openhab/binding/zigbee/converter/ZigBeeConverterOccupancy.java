@@ -17,7 +17,12 @@ import org.slf4j.LoggerFactory;
 import com.zsmartsystems.zigbee.ZigBeeEndpoint;
 import com.zsmartsystems.zigbee.zcl.ZclAttribute;
 import com.zsmartsystems.zigbee.zcl.ZclAttributeListener;
+import com.zsmartsystems.zigbee.zcl.ZclCommand;
+import com.zsmartsystems.zigbee.zcl.ZclCommandListener;
+import com.zsmartsystems.zigbee.zcl.clusters.ZclBasicCluster;
 import com.zsmartsystems.zigbee.zcl.clusters.ZclOccupancySensingCluster;
+import com.zsmartsystems.zigbee.zcl.clusters.onoff.OffCommand;
+import com.zsmartsystems.zigbee.zcl.clusters.onoff.OnCommand;
 import com.zsmartsystems.zigbee.zcl.protocol.ZclClusterType;
 
 /**
@@ -26,10 +31,12 @@ import com.zsmartsystems.zigbee.zcl.protocol.ZclClusterType;
  * @author Chris Jackson - Initial Contribution
  *
  */
-public class ZigBeeConverterOccupancy extends ZigBeeBaseChannelConverter implements ZclAttributeListener {
+public class ZigBeeConverterOccupancy extends ZigBeeBaseChannelConverter
+        implements ZclAttributeListener, ZclCommandListener {
     private Logger logger = LoggerFactory.getLogger(ZigBeeConverterOccupancy.class);
 
     private ZclOccupancySensingCluster clusterOccupancy;
+    private String channelLabel = "Occupancy";
 
     private boolean initialised = false;
 
@@ -50,6 +57,8 @@ public class ZigBeeConverterOccupancy extends ZigBeeBaseChannelConverter impleme
 
         // Add a listener, then request the status
         clusterOccupancy.addAttributeListener(this);
+        clusterOccupancy.addCommandListener(this);
+
         clusterOccupancy.getOccupancy(0);
 
         // Configure reporting - no faster than once per second - no slower than 10 minutes.
@@ -82,8 +91,19 @@ public class ZigBeeConverterOccupancy extends ZigBeeBaseChannelConverter impleme
         if (endpoint.getInputCluster(ZclOccupancySensingCluster.CLUSTER_ID) == null) {
             return null;
         }
+
+        ZclBasicCluster basicCluster = (ZclBasicCluster) endpoint.getInputCluster(ZclBasicCluster.CLUSTER_ID);
+        if (basicCluster == null) {
+            logger.error("{}: Error opening device baisic controls", endpoint.getIeeeAddress());
+        }
+
+        // Get cluster location descriptor for channel label
+        if (basicCluster != null) {
+            channelLabel = basicCluster.getLocationDescription(0);
+        }
+
         return createChannel(thingUID, endpoint, ZigBeeBindingConstants.CHANNEL_OCCUPANCY_SENSOR,
-                ZigBeeBindingConstants.ITEM_TYPE_SWITCH, "Occupancy");
+                ZigBeeBindingConstants.ITEM_TYPE_SWITCH, channelLabel);
     }
 
     @Override
@@ -97,6 +117,19 @@ public class ZigBeeConverterOccupancy extends ZigBeeBaseChannelConverter impleme
             } else {
                 updateChannelState(OnOffType.OFF);
             }
+        }
+    }
+
+    @Override
+    public void commandReceived(ZclCommand command) {
+        OnOffType state = null;
+        if (command instanceof OnCommand) {
+            state = OnOffType.ON;
+        } else if (command instanceof OffCommand) {
+            state = OnOffType.OFF;
+        }
+        if (state != null) {
+            updateChannelState(state);
         }
     }
 }

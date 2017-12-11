@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import com.zsmartsystems.zigbee.ZigBeeEndpoint;
 import com.zsmartsystems.zigbee.zcl.ZclAttribute;
 import com.zsmartsystems.zigbee.zcl.ZclAttributeListener;
+import com.zsmartsystems.zigbee.zcl.clusters.ZclBasicCluster;
 import com.zsmartsystems.zigbee.zcl.clusters.ZclLevelControlCluster;
 import com.zsmartsystems.zigbee.zcl.protocol.ZclClusterType;
 
@@ -31,6 +32,7 @@ public class ZigBeeConverterSwitchLevel extends ZigBeeBaseChannelConverter imple
     private Logger logger = LoggerFactory.getLogger(ZigBeeConverterSwitchLevel.class);
 
     private ZclLevelControlCluster clusterLevelControl;
+    private String channelLabel = "Dimmer";
 
     private boolean initialised = false;
 
@@ -97,8 +99,19 @@ public class ZigBeeConverterSwitchLevel extends ZigBeeBaseChannelConverter imple
         if (endpoint.getInputCluster(ZclLevelControlCluster.CLUSTER_ID) == null) {
             return null;
         }
+
+        ZclBasicCluster basicCluster = (ZclBasicCluster) endpoint.getInputCluster(ZclBasicCluster.CLUSTER_ID);
+        if (basicCluster == null) {
+            logger.error("{}: Error opening device baisic controls", endpoint.getIeeeAddress());
+        }
+
+        // Get cluster location descriptor for channel label
+        if (basicCluster != null) {
+            channelLabel = basicCluster.getLocationDescription(0);
+        }
+
         return createChannel(thingUID, endpoint, ZigBeeBindingConstants.CHANNEL_SWITCH_LEVEL,
-                ZigBeeBindingConstants.ITEM_TYPE_DIMMER, "Dimmer");
+                ZigBeeBindingConstants.ITEM_TYPE_DIMMER, channelLabel);
     }
 
     @Override

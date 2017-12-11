@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import com.zsmartsystems.zigbee.ZigBeeEndpoint;
 import com.zsmartsystems.zigbee.zcl.ZclAttribute;
 import com.zsmartsystems.zigbee.zcl.ZclAttributeListener;
+import com.zsmartsystems.zigbee.zcl.clusters.ZclBasicCluster;
 import com.zsmartsystems.zigbee.zcl.clusters.ZclOnOffCluster;
 import com.zsmartsystems.zigbee.zcl.protocol.ZclClusterType;
 
@@ -31,6 +32,7 @@ public class ZigBeeConverterSwitchOnoff extends ZigBeeBaseChannelConverter imple
     private Logger logger = LoggerFactory.getLogger(ZigBeeConverterSwitchOnoff.class);
 
     private ZclOnOffCluster clusterOnOff;
+    private String channelLabel = "Switch";
 
     private boolean initialised = false;
 
@@ -116,8 +118,19 @@ public class ZigBeeConverterSwitchOnoff extends ZigBeeBaseChannelConverter imple
         if (endpoint.getInputCluster(ZclOnOffCluster.CLUSTER_ID) == null) {
             return null;
         }
+
+        ZclBasicCluster basicCluster = (ZclBasicCluster) endpoint.getInputCluster(ZclBasicCluster.CLUSTER_ID);
+        if (basicCluster == null) {
+            logger.error("{}: Error opening device baisic controls", endpoint.getIeeeAddress());
+        }
+
+        // Get cluster location descriptor for channel label
+        if (basicCluster != null) {
+            channelLabel = basicCluster.getLocationDescription(0);
+        }
+
         return createChannel(thingUID, endpoint, ZigBeeBindingConstants.CHANNEL_SWITCH_ONOFF,
-                ZigBeeBindingConstants.ITEM_TYPE_SWITCH, "Switch");
+                ZigBeeBindingConstants.ITEM_TYPE_SWITCH, channelLabel);
     }
 
     @Override
